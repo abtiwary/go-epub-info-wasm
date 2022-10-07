@@ -1,13 +1,13 @@
 package main
 
 import (
-	"syscall/js"
-	"fmt"
-	"bytes"
-	"os"
-	"io"
 	"archive/zip"
+	"bytes"
 	"encoding/xml"
+	"fmt"
+	"io"
+	"os"
+	"syscall/js"
 )
 
 type Opf struct {
@@ -119,19 +119,19 @@ func InitializeApp() {
 						fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
 					}
 					defer readFile.Close()
-	
+
 					buffer, err := io.ReadAll(readFile)
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
 					}
 					//fmt.Println(string(buffer))
-	
+
 					var opf Opf
 					err = xml.Unmarshal(buffer, &opf)
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
 					}
-	
+
 					fmt.Println("--------------------")
 					fmt.Printf("%v\n", opf.Metadata.Title[0])
 					fmt.Printf("%v\n", opf.Metadata.Creator[0].Data)
@@ -140,7 +140,7 @@ func InitializeApp() {
 					fmt.Printf("%v\n", opf.Metadata.Date[0].Data)
 					fmt.Printf("%v\n", opf.Metadata.Language[0])
 					fmt.Println("--------------------")
-					
+
 					epubTitle.Set("innerText", opf.Metadata.Title[0])
 					epubAuthor.Set("innerText", opf.Metadata.Creator[0].Data)
 					epubIdentifier.Set("innerText", opf.Metadata.Identifier[0].Data)
@@ -164,7 +164,6 @@ func main() {
 	c := make(chan bool)
 
 	js.Global().Set("PrintWASMLoadStatus", js.FuncOf(PrintWASMLoadStatus))
-	//js.Global().Set("WASMUpdateBook", js.FuncOf(WASMUpdateBook))
 
 	InitializeApp()
 
@@ -175,6 +174,6 @@ func main() {
 // Compile with:
 //    GOOS=js GOARCH=wasm go build -o main.wasm
 // or
-//    GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o main.wasm 
+//    GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o main.wasm
 // last tested on Go 1.18
 //
