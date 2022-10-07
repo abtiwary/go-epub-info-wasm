@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"syscall/js"
 )
 
@@ -113,7 +114,7 @@ func InitializeApp() {
 				fileName := subFile.Name
 				//fmt.Printf("%s\n", fileName)
 
-				if fileName == "content.opf" {
+				if strings.Contains(fileName, "content.opf") {
 					readFile, err := subFile.Open()
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
@@ -132,21 +133,51 @@ func InitializeApp() {
 						fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
 					}
 
+					title := ""
+					if len(opf.Metadata.Title) > 0 {
+						title = opf.Metadata.Title[0]
+					}
+
+					author := ""
+					if len(opf.Metadata.Creator) > 0 {
+						author = opf.Metadata.Creator[0].Data
+					}
+
+					identifier := ""
+					if len(opf.Metadata.Identifier) > 0 {
+						identifier = opf.Metadata.Identifier[0].Data
+					}
+
+					publisher := ""
+					if len(opf.Metadata.Publisher) > 0 {
+						publisher = opf.Metadata.Publisher[0]
+					}
+
+					date := ""
+					if len(opf.Metadata.Date) > 0 {
+						date = opf.Metadata.Date[0].Data
+					}
+
+					language := ""
+					if len(opf.Metadata.Language) > 0 {
+						language = opf.Metadata.Language[0]
+					}
+					
 					fmt.Println("--------------------")
-					fmt.Printf("%v\n", opf.Metadata.Title[0])
-					fmt.Printf("%v\n", opf.Metadata.Creator[0].Data)
-					fmt.Printf("%v\n", opf.Metadata.Identifier[0].Data)
-					fmt.Printf("%v\n", opf.Metadata.Publisher[0])
-					fmt.Printf("%v\n", opf.Metadata.Date[0].Data)
-					fmt.Printf("%v\n", opf.Metadata.Language[0])
+					fmt.Printf("%v\n", title)
+					fmt.Printf("%v\n", author)
+					fmt.Printf("%v\n", identifier)
+					fmt.Printf("%v\n", publisher)
+					fmt.Printf("%v\n", date)
+					fmt.Printf("%v\n", language)
 					fmt.Println("--------------------")
 
-					epubTitle.Set("innerText", opf.Metadata.Title[0])
-					epubAuthor.Set("innerText", opf.Metadata.Creator[0].Data)
-					epubIdentifier.Set("innerText", opf.Metadata.Identifier[0].Data)
-					epubPublisher.Set("innerText", opf.Metadata.Publisher[0])
-					epubDate.Set("innerText", opf.Metadata.Date[0].Data)
-					epubLanguage.Set("innerText", opf.Metadata.Language[0])
+					epubTitle.Set("innerText", title)
+					epubAuthor.Set("innerText", author)
+					epubIdentifier.Set("innerText", identifier)
+					epubPublisher.Set("innerText", publisher)
+					epubDate.Set("innerText", date)
+					epubLanguage.Set("innerText", language)
 
 					break
 				}
