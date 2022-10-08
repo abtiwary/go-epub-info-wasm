@@ -41,13 +41,24 @@
         }
     </style>
 
+    <script>
+        var dropzone = null;
+    </script>
+
 </head>
 
 <body onload="init()">
     <div class="flex-container">
         <input type="file" id="epub_file" >
+        <br>
+        
+        <p>OR, drag and drop an epub file into the box below</p>
+        <div id="dropzone" style="width: 400px; height: 85px; min-height: 85px; padding: 15px; border: 1px dashed #bbbbbb">
+            &nbsp;
+        </div>
+        <br>
 
-        <br><hr><br>
+        <hr><br>
 
         <div class="flex-item">
         <label>Title: &nbsp</label><output id="epub_title"></output>
@@ -119,8 +130,6 @@
     </div>
 
 
-
-
 <script>
     const init = () => {
         if (!WebAssembly.instantiateStreaming) { // polyfill
@@ -143,7 +152,36 @@
             console.error(err);
         });
 
+        dropzone = document.getElementById("dropzone");
+        dropzone.addEventListener('dragenter', onDragEnter, false);
+        dropzone.addEventListener('dragover', onDragOver, false);
+        dropzone.addEventListener('dragleave', onDragLeave, false);
+        dropzone.addEventListener('drop', onDrop, false);
     };
+
+    const onDragEnter = (e) => {
+        e.preventDefault();
+    }
+
+    const onDragOver = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    const onDragLeave = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    const onDrop = (e) => {
+        e.preventDefault();
+        let files = e.target.files || e.dataTransfer.files;
+        let t = document.getElementById("epub_file")
+        t.files = files;
+        var evt = new Event('oninput');
+        t.dispatchEvent(evt)
+        GetEpubInfo();
+    }
 
     const copyToClipboard = (elem) => {
         let target_elem = document.getElementById(elem);

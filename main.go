@@ -85,9 +85,8 @@ func PrintWASMLoadStatus(this js.Value, args []js.Value) interface{} {
 	return "WASM loaded!"
 }
 
-func InitializeApp() {
+func GetEpubInfo(v js.Value, x[]js.Value) any {
 	document := js.Global().Get("document")
-
 	epubInput := document.Call("getElementById", "epub_file")
 
 	epubTitle := document.Call("getElementById", "epub_title")
@@ -97,95 +96,103 @@ func InitializeApp() {
 	epubDate := document.Call("getElementById", "epub_date")
 	epubLanguage := document.Call("getElementById", "epub_language")
 
-	epubInput.Set("oninput", js.FuncOf(func(v js.Value, x []js.Value) any {
-		epubInput.Get("files").Call("item", 0).Call("arrayBuffer").Call("then", js.FuncOf(func(v js.Value, x []js.Value) any {
-			data := js.Global().Get("Uint8Array").New(x[0])
-			dst := make([]byte, data.Get("length").Int())
-			fmt.Printf("%v\n", data.Get("length").Int())
-			n := js.CopyBytesToGo(dst, data)
-			fmt.Printf("%v\n", n)
+	epubInput.Get("files").Call("item", 0).Call("arrayBuffer").Call("then", js.FuncOf(func(v js.Value, x []js.Value) any {
+		data := js.Global().Get("Uint8Array").New(x[0])
+		dst := make([]byte, data.Get("length").Int())
+		fmt.Printf("%v\n", data.Get("length").Int())
+		n := js.CopyBytesToGo(dst, data)
+		fmt.Printf("%v\n", n)
 
-			zippedFile, err := zip.NewReader(bytes.NewReader(dst), int64(n))
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
-			}
+		zippedFile, err := zip.NewReader(bytes.NewReader(dst), int64(n))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
+		}
 
-			for _, subFile := range zippedFile.File {
-				fileName := subFile.Name
-				//fmt.Printf("%s\n", fileName)
+		for _, subFile := range zippedFile.File {
+			fileName := subFile.Name
+			//fmt.Printf("%s\n", fileName)
 
-				if strings.Contains(fileName, "content.opf") {
-					readFile, err := subFile.Open()
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
-					}
-					defer readFile.Close()
-
-					buffer, err := io.ReadAll(readFile)
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
-					}
-					//fmt.Println(string(buffer))
-
-					var opf Opf
-					err = xml.Unmarshal(buffer, &opf)
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
-					}
-
-					title := ""
-					if len(opf.Metadata.Title) > 0 {
-						title = opf.Metadata.Title[0]
-					}
-
-					author := ""
-					if len(opf.Metadata.Creator) > 0 {
-						author = opf.Metadata.Creator[0].Data
-					}
-
-					identifier := ""
-					if len(opf.Metadata.Identifier) > 0 {
-						identifier = opf.Metadata.Identifier[0].Data
-					}
-
-					publisher := ""
-					if len(opf.Metadata.Publisher) > 0 {
-						publisher = opf.Metadata.Publisher[0]
-					}
-
-					date := ""
-					if len(opf.Metadata.Date) > 0 {
-						date = opf.Metadata.Date[0].Data
-					}
-
-					language := ""
-					if len(opf.Metadata.Language) > 0 {
-						language = opf.Metadata.Language[0]
-					}
-					
-					fmt.Println("--------------------")
-					fmt.Printf("%v\n", title)
-					fmt.Printf("%v\n", author)
-					fmt.Printf("%v\n", identifier)
-					fmt.Printf("%v\n", publisher)
-					fmt.Printf("%v\n", date)
-					fmt.Printf("%v\n", language)
-					fmt.Println("--------------------")
-
-					epubTitle.Set("innerText", title)
-					epubAuthor.Set("innerText", author)
-					epubIdentifier.Set("innerText", identifier)
-					epubPublisher.Set("innerText", publisher)
-					epubDate.Set("innerText", date)
-					epubLanguage.Set("innerText", language)
-
-					break
+			if strings.Contains(fileName, "content.opf") {
+				readFile, err := subFile.Open()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
 				}
+				defer readFile.Close()
+
+				buffer, err := io.ReadAll(readFile)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
+				}
+				//fmt.Println(string(buffer))
+
+				var opf Opf
+				err = xml.Unmarshal(buffer, &opf)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "an error occurred: %v", err)
+				}
+
+				title := ""
+				if len(opf.Metadata.Title) > 0 {
+					title = opf.Metadata.Title[0]
+				}
+
+				author := ""
+				if len(opf.Metadata.Creator) > 0 {
+					author = opf.Metadata.Creator[0].Data
+				}
+
+				identifier := ""
+				if len(opf.Metadata.Identifier) > 0 {
+					identifier = opf.Metadata.Identifier[0].Data
+				}
+
+				publisher := ""
+				if len(opf.Metadata.Publisher) > 0 {
+					publisher = opf.Metadata.Publisher[0]
+				}
+
+				date := ""
+				if len(opf.Metadata.Date) > 0 {
+					date = opf.Metadata.Date[0].Data
+				}
+
+				language := ""
+				if len(opf.Metadata.Language) > 0 {
+					language = opf.Metadata.Language[0]
+				}
+				
+				fmt.Println("--------------------")
+				fmt.Printf("%v\n", title)
+				fmt.Printf("%v\n", author)
+				fmt.Printf("%v\n", identifier)
+				fmt.Printf("%v\n", publisher)
+				fmt.Printf("%v\n", date)
+				fmt.Printf("%v\n", language)
+				fmt.Println("--------------------")
+
+				epubTitle.Set("innerText", title)
+				epubAuthor.Set("innerText", author)
+				epubIdentifier.Set("innerText", identifier)
+				epubPublisher.Set("innerText", publisher)
+				epubDate.Set("innerText", date)
+				epubLanguage.Set("innerText", language)
+
+				break
 			}
+		}
 
-			return nil
-		}))
+		return nil
+	}))
 
+	return nil
+}
+
+func InitializeApp() {
+	document := js.Global().Get("document")
+	epubInput := document.Call("getElementById", "epub_file")
+
+	epubInput.Set("oninput", js.FuncOf(func(v js.Value, x []js.Value) any {
+		GetEpubInfo(v, x);
 		return nil
 	}))
 
@@ -195,6 +202,7 @@ func main() {
 	c := make(chan bool)
 
 	js.Global().Set("PrintWASMLoadStatus", js.FuncOf(PrintWASMLoadStatus))
+	js.Global().Set("GetEpubInfo", js.FuncOf(GetEpubInfo))
 
 	InitializeApp()
 
